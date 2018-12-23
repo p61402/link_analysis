@@ -10,11 +10,15 @@ class Graph():
         At = A.T
         auth = np.ones(self.node_count)
         hub = np.ones(self.node_count)
+        tol_matrix = tol * np.ones_like(auth)
         for step in range(num_iterations):
+            hub_prev, auth_prev = hub.copy(), auth.copy()
             hub = np.dot(A, auth)
             hub /= hub.sum()
             auth = np.dot(At, hub)
             auth /= auth.sum()
+            if (np.abs(hub_prev - hub) < tol_matrix).all() and (np.abs(auth_prev - auth) < tol_matrix).all():
+                break
         return auth, hub
 
     def pagerank(self, d=0.85, num_iteration=100, tol=1e-06):
@@ -22,9 +26,13 @@ class Graph():
         M = np.divide(self.adj_matrix, v, out=np.zeros_like(self.adj_matrix), where=v!=0)
         M = M.T
         X = X_0 = np.ones(self.node_count) / self.node_count
+        tol_matrix = tol * np.ones_like(X)
     
         for step in range(num_iteration):
+            X_prev = X.copy()
             X = d * np.dot(M, X) + (1 - d) * X_0
+            if (np.abs(X_prev - X) < tol_matrix).all():
+                break
         
         return X
 
